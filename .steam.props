@@ -93,6 +93,32 @@
       Condition="'$(EnableHarmonyWorkshop)'=='true' and Exists('$(WorkshopDir)')">
       <Output TaskParameter="Include" ItemName="WorkshopDllReferences" />
     </CreateItem> 
-  </Target>
+	</Target>
+
+	<!-- Debug target for inspecting file contents and properties -->
+	<Target Name="DebugSteamProperties" DependsOnTargets="ProcessSteamLibraryPaths">
+		<Message Importance="high" Text="=== DebugSteamProperties ===" />
+		<Message Importance="high" Text="SteamInstallPathFromRegistry: [$(SteamInstallPathFromRegistry)]" />
+		<Message Importance="high" Text="SteamDir: [$(SteamDir)]" />
+		<Message Importance="high" Text="CleanSteamDir: [$(CleanSteamDir)]" />
+		<Message Importance="high" Text="LibraryFoldersFile: [$(LibraryFoldersFile)]" />
+		<Message Importance="high" Text="LibraryFileContent: [$(LibraryFileContent)]" />
+		<Message Importance="high" Text="SteamLibraryPath: [$(SteamLibraryPath)]" />
+		<Message Importance="high" Text="WorkshopDir: [$(WorkshopDir)]" />
+		<Message Importance="high" Text="EnableHarmonyWorkshop: [$(EnableHarmonyWorkshop)]" />
+		<Message
+			Importance="high"
+			Text="HarmonyWorkshopDir: [$(HarmonyWorkshopDir)]"
+			Condition="'$(EnableHarmonyWorkshop)'=='true'" />
+
+		<!-- Debug lists of DLLs (if needed) -->
+		<!-- <Message -->
+		<!-- 	Importance="high" -->
+		<!-- 	Text="Found Haste DLLs: @(HasteDllReferences->'%(FullPath)', ', ')" /> -->
+		<!-- <Message -->
+		<!-- 	Importance="high" -->
+		<!-- 	Text="Found Workshop DLLs: @(WorkshopDllReferences->'%(FullPath)', ', ')" -->
+		<!-- 	Condition="'$(EnableHarmonyWorkshop)'=='true'" /> -->
+	</Target>
 </Project>
 
