@@ -3,9 +3,8 @@
   <!-- Steam Path Setup -->
   <PropertyGroup>
     <!-- On Windows: attempt to get the Steam install location from the registry -->
-    <SteamInstallPathFromRegistry Condition="'$(OS)' == 'Windows_NT'">
-      $([MSBuild]::NormalizePath($(registry:HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam@InstallPath)))
-    </SteamInstallPathFromRegistry>
+		<_SteamRegPath>HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam</_SteamRegPath>	
+		<SteamInstallPathFromRegistry Condition="'$(OS)' == 'Windows_NT'">$([MSBuild]::GetRegistryValueFromView('$(_SteamRegPath)', 'InstallPath', null, RegistryView.Registry32))</SteamInstallPathFromRegistry>
 
     <!-- Use the registry value if available -->
     <SteamDir Condition="'$(OS)' == 'Windows_NT' and '$(SteamInstallPathFromRegistry)' != ''">
