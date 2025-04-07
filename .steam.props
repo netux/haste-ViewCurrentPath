@@ -4,17 +4,17 @@
   <PropertyGroup>
     <!-- On Windows: attempt to get the Steam install location from the registry -->
     <SteamInstallPathFromRegistry Condition="'$(OS)' == 'Windows_NT'">
-      $(registry:HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam@InstallPath)
+      $([MSBuild]::NormalizePath($(registry:HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam@InstallPath)))
     </SteamInstallPathFromRegistry>
 
     <!-- Use the registry value if available -->
     <SteamDir Condition="'$(OS)' == 'Windows_NT' and '$(SteamInstallPathFromRegistry)' != ''">
-      $([System.IO.Path]::Combine('$(SteamInstallPathFromRegistry)', 'steamapps'))
+      $([MSBuild]::NormalizePath('$(SteamInstallPathFromRegistry)', 'steamapps'))
     </SteamDir>
 
     <!-- Default for Windows if registry lookup fails -->
     <SteamDir Condition="'$(OS)' == 'Windows_NT' and '$(SteamInstallPathFromRegistry)' == ''">
-      $([System.IO.Path]::Combine('C:', 'Program Files (x86)', 'Steam', 'steamapps'))
+      $([MSBuild]::NormalizePath('C:', 'Program Files (x86)', 'Steam', 'steamapps'))
     </SteamDir>
 
     <!-- Default for non-Windows -->
@@ -30,7 +30,7 @@
   <!-- Compute the path to the libraryfolders.vdf file -->
   <PropertyGroup>
     <CleanSteamDir>$([System.Text.RegularExpressions.Regex]::Replace('$(SteamDir)', '^\s+|\s+$', ''))</CleanSteamDir>
-    <LibraryFoldersFile>$([System.IO.Path]::Combine('$(CleanSteamDir)', 'libraryfolders.vdf'))</LibraryFoldersFile>
+    <LibraryFoldersFile>$([MSBuild]::NormalizePath('$(CleanSteamDir)', 'libraryfolders.vdf'))</LibraryFoldersFile>
   </PropertyGroup>
 
   <!-- Settings that don't depend on file contents -->
@@ -56,10 +56,10 @@
       <SteamLibraryPath Condition="'$(LibraryPathMatch)' == ''">$([System.Text.RegularExpressions.Regex]::Match('$(LibraryFileContent)', '.*"path"\s+"([^"]+)"').Groups[1].Value)</SteamLibraryPath>
       
       <!-- Set HasteDir and Managed DLLs path -->
-      <HasteDir>$([System.IO.Path]::Combine('$(SteamLibraryPath)', 'steamapps', 'common', 'Haste'))</HasteDir>
-      <HasteManagedDir>$([System.IO.Path]::Combine('$(HasteDir)', 'Haste_Data', 'Managed'))</HasteManagedDir>
-      <WorkshopDir>$([System.IO.Path]::Combine('$(SteamLibraryPath)', 'steamapps', 'workshop', 'content', '3408901301'))</WorkshopDir>
-      <HarmonyWorkshopDir>$([System.IO.Path]::Combine('$(WorkshopDir)', '$(HarmonyWorkshopId)', '0Harmony.dll'))</HarmonyWorkshopDir>
+      <HasteDir>$([MSBuild]::NormalizePath('$(SteamLibraryPath)', 'steamapps', 'common', 'Haste'))</HasteDir>
+      <HasteManagedDir>$([MSBuild]::NormalizePath('$(HasteDir)', 'Haste_Data', 'Managed'))</HasteManagedDir>
+      <WorkshopDir>$([MSBuild]::NormalizePath('$(SteamLibraryPath)', 'steamapps', 'workshop', 'content', '3408901301'))</WorkshopDir>
+      <HarmonyWorkshopDir>$([MSBuild]::NormalizePath('$(WorkshopDir)', '$(HarmonyWorkshopId)', '0Harmony.dll'))</HarmonyWorkshopDir>
     </PropertyGroup>
 
     <Message Importance="high" Text="Extracted SteamLibraryPath: [$(SteamLibraryPath)]" />
