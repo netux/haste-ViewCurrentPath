@@ -57,7 +57,7 @@
       <!-- Set HasteDir and Managed DLLs path -->
       <HasteDir>$([MSBuild]::NormalizePath('$(SteamLibraryPath)', 'steamapps', 'common', 'Haste'))</HasteDir>
       <HasteManagedDir>$([MSBuild]::NormalizePath('$(HasteDir)', 'Haste_Data', 'Managed'))</HasteManagedDir>
-      <WorkshopDir>$([MSBuild]::NormalizePath('$(SteamLibraryPath)', 'steamapps', 'workshop', 'content', '3408901301'))</WorkshopDir>
+      <WorkshopDir>$([MSBuild]::NormalizePath('$(SteamLibraryPath)', 'steamapps', 'workshop', 'content', '$(HasteAppId)'))</WorkshopDir>
       <HarmonyWorkshopDir>$([MSBuild]::NormalizePath('$(WorkshopDir)', '$(HarmonyWorkshopId)', '0Harmony.dll'))</HarmonyWorkshopDir>
     </PropertyGroup>
 
