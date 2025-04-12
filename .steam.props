@@ -21,9 +21,11 @@
 
     <!-- Haste's App ID -->
     <HasteAppId>1796470</HasteAppId>
-    <HarmonyWorkshopId>3408901301</HarmonyWorkshopId>
+		<HarmonyWorkshopId>3408901301</HarmonyWorkshopId>
+		<SettingsLibWorkshopId>3462196533</SettingsLibWorkshopId>
 
-    <EnableHarmonyWorkshop Condition="'$(EnableHarmonyWorkshop)'==''">false</EnableHarmonyWorkshop>
+		<EnableHarmony Condition="'$(EnableHarmony)'==''">false</EnableHarmony>
+		<EnableSettingsLib Condition="'$(EnableSettingsLib)'==''">false</EnableSettingsLib>
   </PropertyGroup>
 
   <!-- Compute the path to the libraryfolders.vdf file -->
@@ -58,17 +60,23 @@
       <HasteDir>$([MSBuild]::NormalizePath('$(SteamLibraryPath)', 'steamapps', 'common', 'Haste'))</HasteDir>
       <HasteManagedDir>$([MSBuild]::NormalizePath('$(HasteDir)', 'Haste_Data', 'Managed'))</HasteManagedDir>
       <WorkshopDir>$([MSBuild]::NormalizePath('$(SteamLibraryPath)', 'steamapps', 'workshop', 'content', '$(HasteAppId)'))</WorkshopDir>
-      <HarmonyWorkshopDir>$([MSBuild]::NormalizePath('$(WorkshopDir)', '$(HarmonyWorkshopId)', '0Harmony.dll'))</HarmonyWorkshopDir>
+			<HarmonyWorkshopDir>$([MSBuild]::NormalizePath('$(WorkshopDir)', '$(HarmonyWorkshopId)', '0Harmony.dll'))</HarmonyWorkshopDir>
+			<SettingsLibWorkshopDir>$([MSBuild]::NormalizePath('$(WorkshopDir)', '$(SettingsLibWorkshopId)', 'SettingsLib.dll'))</SettingsLibWorkshopDir>
     </PropertyGroup>
 
     <Message Importance="high" Text="Extracted SteamLibraryPath: [$(SteamLibraryPath)]" />
     <Message Importance="high" Text="HasteDir: [$(HasteDir)]" />
     <Message Importance="high" Text="HasteManagedDir: [$(HasteManagedDir)]" />
-    <Message Importance="high" Text="EnableHarmonyWorkshop: [$(EnableHarmonyWorkshop)]" />
+		<Message Importance="high" Text="EnableHarmony: [$(EnableHarmony)]" />
+		<Message Importance="high" Text="EnableSettingsLib: [$(EnableSettingsLib)]" />
     <Message
       Importance="high"
       Text="Harmony: [$(HarmonyWorkshopDir)]"
-      Condition="'$(EnableHarmonyWorkshop)'=='true'" />
+			Condition="'$(EnableHarmony)'=='true'" />
+		<Message
+			Importance="high"
+			Text="SettingsLib: [$(SettingsLibWorkshopDir)]"
+			Condition="'$(EnableSettingsLib)'=='true'" />
 
     <!-- Add references for Haste Managed DLLs -->
     <ItemGroup Condition="Exists('$(HasteManagedDir)')">
@@ -77,48 +85,15 @@
     
     <!-- Conditionally add references for the Harmony workshop item -->
     <ItemGroup
-      Condition="'$(EnableHarmonyWorkshop)'=='true' and Exists('$(WorkshopDir)')">
+      Condition="'$(EnableHarmony)'=='true' and Exists('$(HarmonyWorkshopDir)')">
       <Reference Include="$(HarmonyWorkshopDir)" Private="false" />
-    </ItemGroup>
-    
-    <!-- These items are output for debugging purposes -->
-    <CreateItem
-      Include="$(HasteManagedDir)/*.dll"
-      Condition="Exists('$(HasteManagedDir)')">
-      <Output TaskParameter="Include" ItemName="HasteDllReferences" />
-    </CreateItem>
-    
-    <CreateItem
-      Include="$(WorkshopDir)/*/*.dll"
-      Condition="'$(EnableHarmonyWorkshop)'=='true' and Exists('$(WorkshopDir)')">
-      <Output TaskParameter="Include" ItemName="WorkshopDllReferences" />
-    </CreateItem> 
+		</ItemGroup>
+
+		<ItemGroup
+			Condition="'$(EnableSettingsLib)'=='true' and Exists('$(SettingsLibWorkshopDir)')">
+			<Reference Include="$(SettingsLibWorkshopDir)" Private="false" />
+		</ItemGroup>
 	</Target>
 
-	<!-- Debug target for inspecting file contents and properties -->
-	<Target Name="DebugSteamProperties" DependsOnTargets="ProcessSteamLibraryPaths">
-		<Message Importance="high" Text="=== DebugSteamProperties ===" />
-		<Message Importance="high" Text="SteamInstallPathFromRegistry: [$(SteamInstallPathFromRegistry)]" />
-		<Message Importance="high" Text="SteamDir: [$(SteamDir)]" />
-		<Message Importance="high" Text="CleanSteamDir: [$(CleanSteamDir)]" />
-		<Message Importance="high" Text="LibraryFoldersFile: [$(LibraryFoldersFile)]" />
-		<Message Importance="high" Text="LibraryFileContent: [$(LibraryFileContent)]" />
-		<Message Importance="high" Text="SteamLibraryPath: [$(SteamLibraryPath)]" />
-		<Message Importance="high" Text="WorkshopDir: [$(WorkshopDir)]" />
-		<Message Importance="high" Text="EnableHarmonyWorkshop: [$(EnableHarmonyWorkshop)]" />
-		<Message
-			Importance="high"
-			Text="HarmonyWorkshopDir: [$(HarmonyWorkshopDir)]"
-			Condition="'$(EnableHarmonyWorkshop)'=='true'" />
-
-		<!-- Debug lists of DLLs (if needed) -->
-		<!-- <Message -->
-		<!-- 	Importance="high" -->
-		<!-- 	Text="Found Haste DLLs: @(HasteDllReferences->'%(FullPath)', ', ')" /> -->
-		<!-- <Message -->
-		<!-- 	Importance="high" -->
-		<!-- 	Text="Found Workshop DLLs: @(WorkshopDllReferences->'%(FullPath)', ', ')" -->
-		<!-- 	Condition="'$(EnableHarmonyWorkshop)'=='true'" /> -->
-	</Target>
 </Project>
 
