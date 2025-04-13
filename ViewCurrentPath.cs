@@ -7,22 +7,30 @@ namespace HasteViewCurrentPath;
 [LandfallPlugin]
 public class ViewCurrentPath
 {
-    public static EscapeMenuCurrentPath? CurrentPathHandler;
+    public static EscapeMenuCurrentPath? CurrentPathComponent;
 
     static ViewCurrentPath()
     {
-        On.EscapeMenuMainPage.Start += static (original, escapeMenuMainPage) =>
-        {
-            original(escapeMenuMainPage);
+        //On.EscapeMenuMainPage.Start += static (original, escapeMenuMainPage) =>
+        //{
+        //    original(escapeMenuMainPage);
 
-            CurrentPathHandler = CreateEscapeMenuCurrentPathComponent((RectTransform) escapeMenuMainPage.transform);
-        };
+        //    CurrentPathHandler = CreateEscapeMenuCurrentPathComponent((RectTransform) escapeMenuMainPage.transform);
+        //};
 
         On.EscapeMenuMainPage.OnPageEnter += static (original, escapeMenuMainPage) =>
         {
             original(escapeMenuMainPage);
 
-            CurrentPathHandler?.OnPageEnter();
+            if (
+                CurrentPathComponent == null ||
+                CurrentPathComponent.text == null // FAILSAFE: for some reason, the text is briefly `null` after Start() runs?
+            )
+            {
+                CurrentPathComponent = CreateEscapeMenuCurrentPathComponent((RectTransform)escapeMenuMainPage.transform);
+            }
+
+            CurrentPathComponent?.OnPageEnter();
         };
     }
 
