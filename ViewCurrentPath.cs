@@ -150,7 +150,7 @@ public class EscapeMenuCurrentPath : MonoBehaviour
         var result = string.Join(" → ", aggregatedQueuedNodeTypes);
         if (hasMore)
         {
-            result += " …";
+            result += " → …";
         }
         return result;
     }
