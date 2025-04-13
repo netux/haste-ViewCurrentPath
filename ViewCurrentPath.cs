@@ -175,9 +175,9 @@ public class EscapeMenuCurrentPath : MonoBehaviour
                 return "Shop";
             case LevelSelectionNode.NodeType.Challenge:
             case LevelSelectionNode.NodeType.Encounter:
-                return "?";
+                return "Unknown";
             case LevelSelectionNode.NodeType.RestStop:
-                return "Rest Stop";
+                return "Rest";
             case LevelSelectionNode.NodeType.Boss:
                 return "Boss";
             default:
