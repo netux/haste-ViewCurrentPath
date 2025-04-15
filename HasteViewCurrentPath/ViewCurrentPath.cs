@@ -79,6 +79,8 @@ public class ViewCurrentPath
 
 public class EscapeMenuCurrentPath : MonoBehaviour
 {
+    public static int MAX_NODES = 5;
+
     public TextMeshProUGUI? text;
 
     public void OnPageEnter()
@@ -135,7 +137,7 @@ public class EscapeMenuCurrentPath : MonoBehaviour
                 }
                 else
                 {
-                    if (aggregatedQueuedNodeTypes.Count >= 5)
+                    if (aggregatedQueuedNodeTypes.Count >= MAX_NODES)
                     {
                         hasMore = true;
                         break;
