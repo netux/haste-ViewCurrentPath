@@ -107,7 +107,7 @@ public class EscapeMenuCurrentPath : MonoBehaviour
         else
         {
             text.gameObject.SetActive(true);
-            text.text = $"UP NEXT: {GenerateText(queuedNodes)}";
+            text.text = $"UP NEXT: {CurrentPathTextGenerator.GenerateText(queuedNodes, MAX_NODES)}";
         }
 
         // TODO(netux): graphics!
@@ -118,8 +118,11 @@ public class EscapeMenuCurrentPath : MonoBehaviour
         //    //Resources.Load
         //}
     }
+}
 
-    internal string GenerateText(IEnumerable<LevelSelectionNode.Data> queuedNodes)
+public static class CurrentPathTextGenerator
+{
+    public static string GenerateText(IEnumerable<LevelSelectionNode.Data> queuedNodes, int maxNodes)
     {
         List<string> aggregatedQueuedNodeTypes = [];
         bool hasMore = false;
@@ -137,12 +140,12 @@ public class EscapeMenuCurrentPath : MonoBehaviour
                 }
                 else
                 {
-                    if (aggregatedQueuedNodeTypes.Count >= MAX_NODES)
+                    if (aggregatedQueuedNodeTypes.Count >= maxNodes)
                     {
                         hasMore = true;
                         break;
                     }
-            
+
                     aggregatedQueuedNodeTypes.Add(GenerateAggregatedNodeTypeText(lastNodeType.Value, repeatedNodeTypeCount));
 
                     repeatedNodeTypeCount = 0;
@@ -165,7 +168,7 @@ public class EscapeMenuCurrentPath : MonoBehaviour
         return result;
     }
 
-    internal string GenerateAggregatedNodeTypeText(LevelSelectionNode.NodeType nodeType, int repeatCount)
+    internal static string GenerateAggregatedNodeTypeText(LevelSelectionNode.NodeType nodeType, int repeatCount)
     {
         string result = GetNodeTypePrettyName(nodeType);
         if (repeatCount > 0)
@@ -175,7 +178,7 @@ public class EscapeMenuCurrentPath : MonoBehaviour
         return result;
     }
 
-    internal string GetNodeTypePrettyName(LevelSelectionNode.NodeType nodeType)
+    internal static string GetNodeTypePrettyName(LevelSelectionNode.NodeType nodeType)
     {
         switch (nodeType)
         {
