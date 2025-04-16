@@ -155,7 +155,7 @@ public static class CurrentPathTextGenerator
             lastNodeType = queuedNode.Type;
         }
 
-        if (lastNodeType.HasValue && repeatedNodeTypeCount > 0 && !hasMore)
+        if (lastNodeType.HasValue && !hasMore)
         {
             aggregatedQueuedNodeTypes.Add(GenerateAggregatedNodeTypeText(lastNodeType.Value, repeatedNodeTypeCount));
         }
