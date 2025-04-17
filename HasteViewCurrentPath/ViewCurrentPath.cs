@@ -1,6 +1,7 @@
 ﻿using Landfall.Modding;
 using TMPro;
 using UnityEngine;
+using Zorro.Core.CLI;
 
 namespace HasteViewCurrentPath;
 
@@ -11,21 +12,11 @@ public class ViewCurrentPath
 
     static ViewCurrentPath()
     {
-        //On.EscapeMenuMainPage.Start += static (original, escapeMenuMainPage) =>
-        //{
-        //    original(escapeMenuMainPage);
-
-        //    CurrentPathHandler = CreateEscapeMenuCurrentPathComponent((RectTransform) escapeMenuMainPage.transform);
-        //};
-
         On.EscapeMenuMainPage.OnPageEnter += static (original, escapeMenuMainPage) =>
         {
             original(escapeMenuMainPage);
 
-            if (
-                CurrentPathComponent == null ||
-                CurrentPathComponent.text == null // FAILSAFE: for some reason, the text is briefly `null` after Start() runs?
-            )
+            if (CurrentPathComponent == null || CurrentPathComponent.gameObject == null)
             {
                 CurrentPathComponent = CreateEscapeMenuCurrentPathComponent((RectTransform)escapeMenuMainPage.transform);
             }
@@ -48,31 +39,7 @@ public class ViewCurrentPath
         currentPathTransform.sizeDelta = cancelPathButtonTransform.sizeDelta;
         currentPathTransform.localScale = Vector3.one;
 
-        var currentPathText = new GameObject("Text", [typeof(TextMeshProUGUI)]).GetComponent<TextMeshProUGUI>();
-        {
-            currentPathText.gameObject.transform.SetParent(currentPathTransform, worldPositionStays: false);
-
-            var cancelPathButtonText = cancelPathButton.Find("Text").GetComponent<TextMeshProUGUI>();
-
-            currentPathText.font = cancelPathButtonText.font;
-            currentPathText.fontMaterial = cancelPathButtonText.fontMaterial;
-            currentPathText.fontSharedMaterial = cancelPathButtonText.fontSharedMaterial;
-            currentPathText.enableWordWrapping = false;
-            currentPathText.overflowMode = TextOverflowModes.Overflow;
-            currentPathText.verticalAlignment = VerticalAlignmentOptions.Middle;
-
-            var textTransform = (RectTransform) currentPathText.gameObject.transform;
-            textTransform.localScale = Vector3.one;
-            textTransform.position = Vector3.zero;
-            textTransform.localPosition = Vector3.zero;
-            textTransform.pivot = Vector2.one / 2;
-            textTransform.anchorMin = Vector2.zero;
-            textTransform.anchorMax = Vector2.one;
-            textTransform.sizeDelta = Vector2.zero;
-        }
-
         var currentPathComponent = currentPathGameObject.AddComponent<EscapeMenuCurrentPath>();
-        currentPathComponent.text = currentPathText;
         return currentPathComponent;
     }
 }
@@ -81,13 +48,41 @@ public class EscapeMenuCurrentPath : MonoBehaviour
 {
     public static int MAX_NODES = 5;
 
-    public TextMeshProUGUI? text;
+    public ICurrentPathRenderers[] renderers = [
+        new CurrentPathTextRenderer(),
+    ];
+
+    public void Start()
+    {
+        SetupRenderers();
+    }
+
+    private void SetupRenderers()
+    {
+        foreach (var renderer in renderers)
+        {
+            renderer.Setup((RectTransform) this.gameObject.transform);
+        }
+    }
 
     public void OnPageEnter()
     {
-        Render();
+        try
+        {
+            Render();
+        }
+        catch (Exception)
+        {
+            // FAILSAFE: for some reason, any objects created by the renderers might be removed after on page enter?
+
+            Debug.Log($"{typeof(EscapeMenuCurrentPath).Name}: Failsafe triggered!");
+
+            SetupRenderers();
+            Render();
+        }
     }
 
+    [ConsoleCommand]
     public void Render()
     {
         Render(RunHandler.RunData.QueuedNodes);
@@ -95,106 +90,15 @@ public class EscapeMenuCurrentPath : MonoBehaviour
 
     public void Render(IEnumerable<LevelSelectionNode.Data> queuedNodes)
     {
-        if (text == null)
+        var aggregateResult = PathAggregator.Aggregate(queuedNodes, MAX_NODES);
+
+        var firstAvailableRenderer = renderers.FirstOrDefault(renderer => renderer.CanBeUsed());
+
+        if (firstAvailableRenderer == null)
         {
-            throw new Exception("EscapeMenuCurrentPath text is null");
+            throw new Exception("No renderer available to render current node path");
         }
 
-        if (queuedNodes.Count() == 0)
-        {
-            text.gameObject.SetActive(false);
-        }
-        else
-        {
-            text.gameObject.SetActive(true);
-            text.text = $"UP NEXT: {CurrentPathTextGenerator.GenerateText(queuedNodes, MAX_NODES)}";
-        }
-
-        // TODO(netux): graphics!
-        //foreach (var queuedNode in RunHandler.RunData.QueuedNodes)
-        //{
-        //    // M_VFX_Node_Icon_Store
-        //    // mapicon_Shop 1.png
-        //    //Resources.Load
-        //}
-    }
-}
-
-public static class CurrentPathTextGenerator
-{
-    public static string GenerateText(IEnumerable<LevelSelectionNode.Data> queuedNodes, int maxNodes)
-    {
-        List<string> aggregatedQueuedNodeTypes = [];
-        bool hasMore = false;
-
-        LevelSelectionNode.NodeType? lastNodeType = null;
-        int repeatedNodeTypeCount = 0;
-
-        foreach (var queuedNode in queuedNodes)
-        {
-            if (lastNodeType.HasValue)
-            {
-                if (lastNodeType == queuedNode.Type)
-                {
-                    repeatedNodeTypeCount++;
-                }
-                else
-                {
-                    if (aggregatedQueuedNodeTypes.Count >= maxNodes)
-                    {
-                        hasMore = true;
-                        break;
-                    }
-
-                    aggregatedQueuedNodeTypes.Add(GenerateAggregatedNodeTypeText(lastNodeType.Value, repeatedNodeTypeCount));
-
-                    repeatedNodeTypeCount = 0;
-                }
-            }
-
-            lastNodeType = queuedNode.Type;
-        }
-
-        if (lastNodeType.HasValue && !hasMore)
-        {
-            aggregatedQueuedNodeTypes.Add(GenerateAggregatedNodeTypeText(lastNodeType.Value, repeatedNodeTypeCount));
-        }
-
-        var result = string.Join(" → ", aggregatedQueuedNodeTypes);
-        if (hasMore)
-        {
-            result += " → …";
-        }
-        return result;
-    }
-
-    internal static string GenerateAggregatedNodeTypeText(LevelSelectionNode.NodeType nodeType, int repeatCount)
-    {
-        string result = GetNodeTypePrettyName(nodeType);
-        if (repeatCount > 0)
-        {
-            result += $" x{repeatCount + 1}";
-        }
-        return result;
-    }
-
-    internal static string GetNodeTypePrettyName(LevelSelectionNode.NodeType nodeType)
-    {
-        switch (nodeType)
-        {
-            case LevelSelectionNode.NodeType.Default:
-                return "Fragment";
-            case LevelSelectionNode.NodeType.Shop:
-                return "Shop";
-            case LevelSelectionNode.NodeType.Challenge:
-            case LevelSelectionNode.NodeType.Encounter:
-                return "Unknown";
-            case LevelSelectionNode.NodeType.RestStop:
-                return "Rest";
-            case LevelSelectionNode.NodeType.Boss:
-                return "Boss";
-            default:
-                return nodeType.ToString();
-        }
+        firstAvailableRenderer.Render(aggregateResult.Nodes, showEllipsis: aggregateResult.HasMore);
     }
 }
