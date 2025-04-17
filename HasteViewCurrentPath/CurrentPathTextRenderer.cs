@@ -84,7 +84,8 @@ public class CurrentPathTextRenderer : ICurrentPathRenderers
         {
             LevelSelectionNode.NodeType.Default => "Fragment",
             LevelSelectionNode.NodeType.Shop => "Shop",
-            LevelSelectionNode.NodeType.Challenge or LevelSelectionNode.NodeType.Encounter => "Unknown",
+            LevelSelectionNode.NodeType.Challenge => "Challenge",
+            LevelSelectionNode.NodeType.Encounter => "Encounter",
             LevelSelectionNode.NodeType.RestStop => "Rest",
             LevelSelectionNode.NodeType.Boss => "Boss",
             _ => nodeType.ToString(),
