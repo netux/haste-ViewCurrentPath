@@ -115,7 +115,6 @@ public class CurrentPathIconRenderer : ICurrentPathRenderer
             {
                 var repeatCountText = NewTextMeshProWithText($"Node {index} Count", $"×{node.RepeatCount + 1}");
                 repeatCountText.fontSize = repeatCountText.fontSize * 0.8f;
-                repeatCountText.margin = new Vector4(5, 0, 0, 0); // left padding to separate it from the image
                 repeatCountText.transform.SetParent(container.transform, worldPositionStays: false);
             }
 
