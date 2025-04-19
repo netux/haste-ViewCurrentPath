@@ -6,8 +6,6 @@ namespace HasteViewCurrentPath;
 
 public class EscapeMenuCurrentPath : MonoBehaviour
 {
-    public static int MAX_NODES = 5;
-
     public ICurrentPathRenderer? Renderer { get => ViewCurrentPath.Renderer; }
 
     public void OnPageEnter()
@@ -50,7 +48,8 @@ public class EscapeMenuCurrentPath : MonoBehaviour
             throw new AssertionException("Renderer == null", "No Current Path Renderer has been configured");
         }
 
-        var aggregateResult = PathAggregator.Aggregate(queuedNodes, MAX_NODES);
+        var maxNodes = GameHandler.Instance.SettingsHandler.GetSetting<Settings.MaxNodesRenderedSetting>().Value;
+        var aggregateResult = PathAggregator.Aggregate(queuedNodes, maxNodes);
 
         Renderer.Render(aggregateResult.Nodes, showEllipsis: aggregateResult.HasMore);
     }

@@ -1,6 +1,7 @@
 ﻿using Landfall.Haste;
 using UnityEngine.Localization;
 using Zorro.Settings;
+using Zorro.Settings.DebugUI;
 
 namespace HasteViewCurrentPath;
 
@@ -46,6 +47,28 @@ public static class Settings
             IconWithTextFallback,
             Text
         }
+    }
+
+    [HasteSetting]
+    public class MaxNodesRenderedSetting : IntSetting, IExposedSetting
+    {
+        static readonly int DEFAULT_VALUE = 5;
+
+        public override void ApplyValue()
+        {
+            if (!ViewCurrentPath.IsHooked || ViewCurrentPath.Renderer == null)
+            {
+                return;
+            }
+
+            ViewCurrentPath.Render();
+        }
+
+        protected override int GetDefaultValue() => DEFAULT_VALUE;
+
+        public string GetCategory() => Category;
+
+        public LocalizedString GetDisplayName() => new UnlocalizedString("Max Nodes to Render");
     }
 }
 
