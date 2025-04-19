@@ -11,6 +11,7 @@ namespace HasteViewCurrentPath;
 public class ViewCurrentPath
 {
     public static EscapeMenuCurrentPath? CurrentPathComponent;
+    public static bool IsHooked { get => CurrentPathComponent != null; }
     
     public static ICurrentPathRenderer? Renderer { get; private set; }
 
