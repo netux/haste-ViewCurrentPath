@@ -1,6 +1,6 @@
 ﻿using Landfall.Modding;
-using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using Zorro.Core.CLI;
 
 namespace HasteViewCurrentPath;
@@ -27,7 +27,7 @@ public class ViewCurrentPath
 
     static EscapeMenuCurrentPath CreateEscapeMenuCurrentPathComponent(RectTransform escapeMenuMainPageTransform)
     {
-        var currentPathGameObject = new GameObject("CurrentPath", [typeof(RectTransform)]);
+        var currentPathGameObject = new GameObject("CurrentPath", [typeof(RectTransform), typeof(HorizontalLayoutGroup)]);
         var currentPathTransform = currentPathGameObject.GetComponent<RectTransform>();
 
         var cancelPathButton = escapeMenuMainPageTransform.Find("Buttons/CancelPath");
@@ -39,6 +39,16 @@ public class ViewCurrentPath
         currentPathTransform.sizeDelta = cancelPathButtonTransform.sizeDelta;
         currentPathTransform.localScale = Vector3.one;
 
+        var currentPathHorizontalLayoutGroup = currentPathGameObject.GetComponent<HorizontalLayoutGroup>();
+        currentPathHorizontalLayoutGroup.childAlignment = TextAnchor.MiddleLeft;
+        currentPathHorizontalLayoutGroup.childControlWidth = false;
+        currentPathHorizontalLayoutGroup.childControlHeight = true;
+        currentPathHorizontalLayoutGroup.childScaleWidth = true;
+        currentPathHorizontalLayoutGroup.childScaleHeight = true;
+        currentPathHorizontalLayoutGroup.childForceExpandWidth = false;
+        currentPathHorizontalLayoutGroup.childForceExpandHeight = true;
+        currentPathHorizontalLayoutGroup.spacing = 10f;
+
         var currentPathComponent = currentPathGameObject.AddComponent<EscapeMenuCurrentPath>();
         return currentPathComponent;
     }
@@ -49,6 +59,7 @@ public class EscapeMenuCurrentPath : MonoBehaviour
     public static int MAX_NODES = 5;
 
     public ICurrentPathRenderers[] renderers = [
+        new CurrentPathIconRenderer(),
         new CurrentPathTextRenderer(),
     ];
 
