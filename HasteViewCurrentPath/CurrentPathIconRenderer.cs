@@ -14,7 +14,7 @@ public class CurrentPathIconRenderer : ICurrentPathRenderer
 
     private GameObject? container;
 
-    public bool NeedsSetup() => NodeTextures.AllTexturesArePresent() || fallbackTextRenderer.NeedsSetup();
+    public bool NeedsSetup() => !NodeTextures.AllTexturesArePresent() || fallbackTextRenderer.NeedsSetup();
 
     public void Setup(RectTransform parentTransform)
     {
