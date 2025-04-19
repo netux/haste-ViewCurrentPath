@@ -52,7 +52,7 @@ public class CurrentPathIconRenderer : ICurrentPathRenderer
 
         if (container != null)
         {
-            GameObject.DestroyImmediate(container);
+            GameObject.Destroy(container);
         }
 
         foreach (var material in textureToMaterialMap.Values)
