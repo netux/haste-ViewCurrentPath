@@ -3,9 +3,11 @@ using UnityEngine;
 
 namespace HasteViewCurrentPath;
 
-public class CurrentPathTextRenderer : ICurrentPathRenderers
+public class CurrentPathTextRenderer : ICurrentPathRenderer
 {
     public TextMeshProUGUI? text;
+
+    public bool NeedsSetup() => text != null;
 
     public void Setup(RectTransform parentTransform)
     {
@@ -34,7 +36,13 @@ public class CurrentPathTextRenderer : ICurrentPathRenderers
         }
     }
 
-    public bool CanBeUsed() => text != null;
+    public void Dispose()
+    {
+        if (text != null)
+        {
+            GameObject.Destroy(text.gameObject);
+        }
+    }
 
     public void Render(IEnumerable<PathAggregator.PathNode> nodes, bool showEllipsis)
     {

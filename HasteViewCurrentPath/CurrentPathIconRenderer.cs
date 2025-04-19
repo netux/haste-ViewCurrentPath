@@ -6,15 +6,21 @@ using Zorro.Core;
 
 namespace HasteViewCurrentPath;
 
-public class CurrentPathIconRenderer : ICurrentPathRenderers
+public class CurrentPathIconRenderer : ICurrentPathRenderer
 {
+    private readonly CurrentPathTextRenderer fallbackTextRenderer = new();
+
     private readonly Dictionary<Texture2D, Material> textureToMaterialMap = [];
 
     private GameObject? container;
 
+    public bool NeedsSetup() => NodeTextures.AllTexturesArePresent() || fallbackTextRenderer.NeedsSetup();
+
     public void Setup(RectTransform parentTransform)
     {
-        NodeTextures.FindFromLoaded();
+        fallbackTextRenderer.Setup(parentTransform);
+
+        NodeTextures.FindFromLoadedResources();
 
         if (container == null)
         {
@@ -40,13 +46,39 @@ public class CurrentPathIconRenderer : ICurrentPathRenderers
         }
     }
 
-    public bool CanBeUsed() => NodeTextures.AllTexturesArePresent();
+    public void Dispose()
+    {
+        fallbackTextRenderer.Dispose();
+
+        if (container != null)
+        {
+            GameObject.DestroyImmediate(container);
+        }
+
+        foreach (var material in textureToMaterialMap.Values)
+        {
+            GameObject.Destroy(material);
+        }
+        textureToMaterialMap.Clear();
+
+        NodeTextures.Reset();
+    }
 
     public void Render(IEnumerable<PathAggregator.PathNode> nodes, bool showEllipsis)
     {
         if (container == null)
         {
             throw new AssertionException("container == null", "CurrentPathGraphicRenderer's container is null. Cannot render path.");
+        }
+
+        if (!NodeTextures.AllTexturesArePresent())
+        {
+            Debug.LogWarning("CurrentPathIconRenderer: Not all textures are present, falling back to text renderer.");
+
+            container?.SetActive(false);
+            fallbackTextRenderer.Render(nodes, showEllipsis);
+            fallbackTextRenderer.text?.gameObject.SetActive(true);
+            return;
         }
 
         container.transform.ClearChildren(); // Thanks Zorro!
@@ -94,6 +126,9 @@ public class CurrentPathIconRenderer : ICurrentPathRenderers
             var ellipsisText = NewTextMeshProWithText($"Ellipsis Text", "→ ...");
             ellipsisText.transform.SetParent(container.transform, worldPositionStays: false);
         }
+
+        fallbackTextRenderer.text?.gameObject.SetActive(false);
+        container.SetActive(true);
     }
 
     private Material GetMaterialForTexture(string name, Texture2D texture)
@@ -203,22 +238,23 @@ public class CurrentPathIconRenderer : ICurrentPathRenderers
             },
         };
 
-        internal static Texture2D baseTexture;
-        
-        internal static Dictionary<LevelSelectionNode.NodeType, Texture2D> generatedTextures = [];
-
-        static NodeTextures()
+        private static Texture2D? _baseTexture;
+        internal static Texture2D BaseTexture
         {
-            if (baseTexture == null)
-            {
-                baseTexture = CreateBaseTexture();
+            get {
+                if (_baseTexture == null)
+                {
+                    _baseTexture = CreateBaseTexture();
+                }
+
+                return _baseTexture;
             }
         }
+        
+        private static readonly Dictionary<LevelSelectionNode.NodeType, Texture2D> generatedTextures = [];
 
-        internal static void FindFromLoaded()
+        internal static void FindFromLoadedResources()
         {
-            Debug.Log("CurrentPathGraphicRenderer.NodeTextures.FindFromLoaded() called");
-
             foreach (Texture2D texture in Resources.FindObjectsOfTypeAll<Texture2D>())
             {
                 if (!FindAndGenerateConfigs.TryGetValue(texture.name, out GenerationConfig generationConfig))
@@ -240,8 +276,6 @@ public class CurrentPathIconRenderer : ICurrentPathRenderers
 
         internal static bool AllTexturesArePresent()
         {
-            Debug.Log("CurrentPathGraphicRenderer.NodeTextures.AllTexturesArePresent() called");
-
             foreach (var config in FindAndGenerateConfigs.Values)
             {
                 if (!generatedTextures.ContainsKey(config.nodeType) || generatedTextures[config.nodeType] == null)
@@ -258,10 +292,21 @@ public class CurrentPathIconRenderer : ICurrentPathRenderers
         {
             if (nodeType == LevelSelectionNode.NodeType.Default)
             {
-                return baseTexture;
+                return BaseTexture;
             }
 
             return generatedTextures[nodeType];
+        }
+
+        internal static void Reset()
+        {
+            _baseTexture = null;
+
+            foreach (var texture in generatedTextures.Values)
+            {
+                GameObject.Destroy(texture);
+            }
+            generatedTextures.Clear();
         }
 
         private static Texture2D CreateBaseTexture()
@@ -300,7 +345,7 @@ public class CurrentPathIconRenderer : ICurrentPathRenderers
 
         private static Texture2D MergeTextureWithBase(Texture2D overlayTexture, float scale)
         {
-            var baseImage = Util.ConvertTexture2DToImage(baseTexture);
+            var baseImage = Util.ConvertTexture2DToImage(BaseTexture);
             var overlayImage = Util.ConvertTexture2DToImage(overlayTexture);
 
             // When scale < 1f, scale overlay down to fit inside base circle.

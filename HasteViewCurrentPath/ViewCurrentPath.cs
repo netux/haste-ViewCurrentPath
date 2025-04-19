@@ -58,37 +58,45 @@ public class EscapeMenuCurrentPath : MonoBehaviour
 {
     public static int MAX_NODES = 5;
 
-    public ICurrentPathRenderers[] renderers = [
-        new CurrentPathIconRenderer(),
-        new CurrentPathTextRenderer(),
-    ];
+    public ICurrentPathRenderer Renderer { get; private set; } = new CurrentPathIconRenderer();
 
     public void Start()
     {
-        SetupRenderers();
+        SetupRenderer();
     }
 
-    private void SetupRenderers()
+    private void SetupRenderer()
     {
-        foreach (var renderer in renderers)
-        {
-            renderer.Setup((RectTransform) this.gameObject.transform);
-        }
+        Renderer.Setup((RectTransform)transform);
+    }
+
+    public void SetRenderer<T>() where T : ICurrentPathRenderer, new()
+    {
+        Renderer?.Dispose();
+
+        Renderer = new T();
+        SetupRenderer();
     }
 
     public void OnPageEnter()
     {
+        if (Renderer.NeedsSetup())
+        {
+            // FAILSAFE: for some reason, objects created by the renderers might be removed after on page enter?
+            Debug.Log($"{typeof(EscapeMenuCurrentPath).Name}: Failsafe 1 triggered!");
+            Renderer.Setup((RectTransform) transform);
+        }
+
         try
         {
             Render();
         }
         catch (Exception)
         {
-            // FAILSAFE: for some reason, any objects created by the renderers might be removed after on page enter?
+            // FAILSAFE: and even after that, maybe it needs _yet another_ setup?
+            Debug.Log($"{typeof(EscapeMenuCurrentPath).Name}: Failsafe 2 triggered!");
 
-            Debug.Log($"{typeof(EscapeMenuCurrentPath).Name}: Failsafe triggered!");
-
-            SetupRenderers();
+            Renderer.Setup((RectTransform)transform);
             Render();
         }
     }
@@ -103,13 +111,6 @@ public class EscapeMenuCurrentPath : MonoBehaviour
     {
         var aggregateResult = PathAggregator.Aggregate(queuedNodes, MAX_NODES);
 
-        var firstAvailableRenderer = renderers.FirstOrDefault(renderer => renderer.CanBeUsed());
-
-        if (firstAvailableRenderer == null)
-        {
-            throw new Exception("No renderer available to render current node path");
-        }
-
-        firstAvailableRenderer.Render(aggregateResult.Nodes, showEllipsis: aggregateResult.HasMore);
+        Renderer.Render(aggregateResult.Nodes, showEllipsis: aggregateResult.HasMore);
     }
 }

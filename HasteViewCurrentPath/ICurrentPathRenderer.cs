@@ -2,11 +2,13 @@
 
 namespace HasteViewCurrentPath;
 
-public interface ICurrentPathRenderers
+public interface ICurrentPathRenderer
 {
+    public bool NeedsSetup();
+
     public void Setup(RectTransform parentTransform);
 
-    public bool CanBeUsed();
+    public void Dispose();
 
     public void Render(IEnumerable<PathAggregator.PathNode> aggregatedNodes, bool showEllipsis);
 }
