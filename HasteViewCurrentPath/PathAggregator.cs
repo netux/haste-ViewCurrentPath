@@ -5,12 +5,9 @@ public static class PathAggregator
     public class PathNode
     {
         public LevelSelectionNode.NodeType Type;
-        public int Count { get; internal set; } = 0;
+        public int RepeatCount { get; internal set; } = 0;
 
-        public void Increase()
-        {
-            Count++;
-        }
+        public void IncreaseRepeatCount() => RepeatCount++;
     }
 
     public class AggregateResult
@@ -35,7 +32,7 @@ public static class PathAggregator
                 var lastAggregatedNode = result.Nodes.Last();
                 if (lastAggregatedNode.Type == nodeType)
                 {
-                    lastAggregatedNode.Increase();
+                    lastAggregatedNode.IncreaseRepeatCount();
                     continue;
                 }
             }

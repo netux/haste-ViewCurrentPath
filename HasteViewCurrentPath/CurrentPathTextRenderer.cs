@@ -72,9 +72,9 @@ public class CurrentPathTextRenderer : ICurrentPathRenderer
     internal string GeneratePathNodeText(PathAggregator.PathNode pathNode)
     {
         string result = GetNodeTypePrettyName(pathNode.Type);
-        if (pathNode.Count > 0)
+        if (pathNode.RepeatCount > 0)
         {
-            result += $" x{pathNode.Count + 1}";
+            result += $" x{pathNode.RepeatCount + 1}";
         }
         return result;
     }

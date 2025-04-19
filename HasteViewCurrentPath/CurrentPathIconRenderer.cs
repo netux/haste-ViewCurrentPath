@@ -111,9 +111,9 @@ public class CurrentPathIconRenderer : ICurrentPathRenderer
             //    nodeText.transform.SetParent(container.transform, worldPositionStays: false);
             //}
 
-            if (node.Count > 1)
+            if (node.RepeatCount > 1)
             {
-                var countText = NewTextMeshProWithText($"Node {index} Count", $"x{node.Count + 1}");
+                var countText = NewTextMeshProWithText($"Node {index} Count", $"x{node.RepeatCount + 1}");
                 countText.margin = new Vector4(5, 0, 0, 0); // left padding to separate it from the image
                 countText.transform.SetParent(container.transform, worldPositionStays: false);
             }
