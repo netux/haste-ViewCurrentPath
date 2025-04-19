@@ -104,12 +104,12 @@ public class CurrentPathIconRenderer : ICurrentPathRenderer
                 var nodeImage = NewImageWithMaterial($"Node {index} ({node.Type}) Image", GetMaterialForTexture($"{node.Type} Node Material", nodeTexture));
                 nodeImage.transform.SetParent(container.transform, worldPositionStays: false);
             }
-            //else
-            //{
-            //    // Shouldn't happen as long as Landfall doesn't add a new node type...
-            //    var nodeText = NewTextMeshProWithText($"Node {index} Text", node.Type.ToString());
-            //    nodeText.transform.SetParent(container.transform, worldPositionStays: false);
-            //}
+            else
+            {
+                // Shouldn't happen as long as Landfall doesn't add a new node type...
+                var nodeText = NewTextMeshProWithText($"Node {index} Text", node.Type.ToString());
+                nodeText.transform.SetParent(container.transform, worldPositionStays: false);
+            }
 
             if (node.RepeatCount > 0)
             {
