@@ -14,7 +14,7 @@ public class CurrentPathTextRenderer : ICurrentPathRenderers
             text = new GameObject("Text", [typeof(TextMeshProUGUI)]).GetComponent<TextMeshProUGUI>();
             text.gameObject.transform.SetParent(parentTransform, worldPositionStays: false);
 
-            var referenceText = Util.GetReferenceTMP(parentTransform.parent);
+            var referenceText = Util.GetReferenceTextMeshPro(parentTransform.parent);
 
             text.font = referenceText.font;
             text.fontMaterial = referenceText.fontMaterial;
