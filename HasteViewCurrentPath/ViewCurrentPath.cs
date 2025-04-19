@@ -1,5 +1,7 @@
 ﻿using Landfall.Modding;
+using System.Reflection;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.UI;
 using Zorro.Core.CLI;
 
@@ -9,6 +11,8 @@ namespace HasteViewCurrentPath;
 public class ViewCurrentPath
 {
     public static EscapeMenuCurrentPath? CurrentPathComponent;
+    
+    public static ICurrentPathRenderer? Renderer { get; private set; }
 
     static ViewCurrentPath()
     {
@@ -19,6 +23,12 @@ public class ViewCurrentPath
             if (CurrentPathComponent == null || CurrentPathComponent.gameObject == null)
             {
                 CurrentPathComponent = CreateEscapeMenuCurrentPathComponent((RectTransform)escapeMenuMainPage.transform);
+            }
+
+            if (Renderer == null)
+            {
+                var rendererType = GameHandler.Instance.SettingsHandler.GetSetting<Settings.RendererSetting>().SelectedRendererType;
+                SetRenderer(rendererType);
             }
 
             CurrentPathComponent?.OnPageEnter();
@@ -52,65 +62,36 @@ public class ViewCurrentPath
         var currentPathComponent = currentPathGameObject.AddComponent<EscapeMenuCurrentPath>();
         return currentPathComponent;
     }
-}
 
-public class EscapeMenuCurrentPath : MonoBehaviour
-{
-    public static int MAX_NODES = 5;
-
-    public ICurrentPathRenderer Renderer { get; private set; } = new CurrentPathIconRenderer();
-
-    public void Start()
+    private static void SetupRenderer()
     {
-        SetupRenderer();
+        if (CurrentPathComponent == null)
+        {
+            throw new AssertionException("CurrentPathComponent == null", "Current Path component has not been instantiated");
+        }
+
+        if (Renderer == null)
+        {
+            throw new AssertionException("Renderer == null", "No Current Path Renderer has been configured");
+        }
+
+        Renderer.Setup((RectTransform)CurrentPathComponent.transform);
     }
 
-    private void SetupRenderer()
-    {
-        Renderer.Setup((RectTransform)transform);
-    }
+    public static void SetRenderer<T>() where T : ICurrentPathRenderer, new() => SetRenderer(typeof(T));
 
-    public void SetRenderer<T>() where T : ICurrentPathRenderer, new()
+    public static void SetRenderer(Type rendererType)
     {
+        Debug.Log($"{MethodBase.GetCurrentMethod().DeclaringType.Name}: Setting up new renderer: {rendererType.Name}");
+
         Renderer?.Dispose();
-
-        Renderer = new T();
+        Renderer = (ICurrentPathRenderer)rendererType.GetConstructor([]).Invoke([]);
         SetupRenderer();
-    }
-
-    public void OnPageEnter()
-    {
-        if (Renderer.NeedsSetup())
-        {
-            // FAILSAFE: for some reason, objects created by the renderers might be removed after on page enter?
-            Debug.Log($"{typeof(EscapeMenuCurrentPath).Name}: Failsafe 1 triggered!");
-            Renderer.Setup((RectTransform) transform);
-        }
-
-        try
-        {
-            Render();
-        }
-        catch (Exception)
-        {
-            // FAILSAFE: and even after that, maybe it needs _yet another_ setup?
-            Debug.Log($"{typeof(EscapeMenuCurrentPath).Name}: Failsafe 2 triggered!");
-
-            Renderer.Setup((RectTransform)transform);
-            Render();
-        }
     }
 
     [ConsoleCommand]
-    public void Render()
+    public static void Render()
     {
-        Render(RunHandler.RunData.QueuedNodes);
-    }
-
-    public void Render(IEnumerable<LevelSelectionNode.Data> queuedNodes)
-    {
-        var aggregateResult = PathAggregator.Aggregate(queuedNodes, MAX_NODES);
-
-        Renderer.Render(aggregateResult.Nodes, showEllipsis: aggregateResult.HasMore);
+        CurrentPathComponent?.Render();
     }
 }
