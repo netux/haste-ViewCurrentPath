@@ -74,7 +74,7 @@ public class CurrentPathTextRenderer : ICurrentPathRenderer
         string result = GetNodeTypePrettyName(pathNode.Type);
         if (pathNode.RepeatCount > 0)
         {
-            result += $" x{pathNode.RepeatCount + 1}";
+            result += $" ×{pathNode.RepeatCount + 1}";
         }
         return result;
     }

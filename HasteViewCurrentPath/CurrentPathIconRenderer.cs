@@ -113,10 +113,10 @@ public class CurrentPathIconRenderer : ICurrentPathRenderer
 
             if (node.RepeatCount > 0)
             {
-                var countText = NewTextMeshProWithText($"Node {index} Count", $"x{node.RepeatCount + 1}");
-                countText.fontSize = countText.fontSize * 0.8f;
-                countText.margin = new Vector4(5, 0, 0, 0); // left padding to separate it from the image
-                countText.transform.SetParent(container.transform, worldPositionStays: false);
+                var repeatCountText = NewTextMeshProWithText($"Node {index} Count", $"×{node.RepeatCount + 1}");
+                repeatCountText.fontSize = repeatCountText.fontSize * 0.8f;
+                repeatCountText.margin = new Vector4(5, 0, 0, 0); // left padding to separate it from the image
+                repeatCountText.transform.SetParent(container.transform, worldPositionStays: false);
             }
 
             index++;
