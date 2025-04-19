@@ -95,6 +95,7 @@ public class CurrentPathIconRenderer : ICurrentPathRenderer
             else
             {
                 var transitionText = NewTextMeshProWithText($"Node {index} Transition Text", "→");
+                transitionText.verticalAlignment = VerticalAlignmentOptions.Bottom;
                 transitionText.transform.SetParent(container.transform, worldPositionStays: false);
             }
 
@@ -124,6 +125,7 @@ public class CurrentPathIconRenderer : ICurrentPathRenderer
         if (showEllipsis)
         {
             var ellipsisText = NewTextMeshProWithText($"Ellipsis Text", "→ ...");
+            ellipsisText.verticalAlignment = VerticalAlignmentOptions.Bottom;
             ellipsisText.transform.SetParent(container.transform, worldPositionStays: false);
         }
 
@@ -155,7 +157,6 @@ public class CurrentPathIconRenderer : ICurrentPathRenderer
         var imageGameObject = new GameObject(name, [typeof(RectTransform), typeof(Image), typeof(AspectRatioFitter)]);
 
         var imageImage = imageGameObject.GetComponent<Image>();
-
         imageImage.material = material;
 
         var imageAspectRatioFitter = imageGameObject.GetComponent<AspectRatioFitter>();
