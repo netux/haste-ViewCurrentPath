@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -131,6 +132,29 @@ public class CurrentPathIconRenderer : ICurrentPathRenderer
 
         fallbackTextRenderer.text?.gameObject.SetActive(false);
         container.SetActive(true);
+
+        GameHandler.Instance.StartCoroutine(MarkContainerLayoutForRebuildASAP());
+    }
+
+    private IEnumerator MarkContainerLayoutForRebuildASAP()
+    {
+        if (container == null)
+        {
+            throw new AssertionException("container == null after a frame", "Container became null a after a frame of rendering");
+        }
+
+        LayoutRebuilder.MarkLayoutForRebuild((RectTransform)container.transform);
+
+        while (!container.activeInHierarchy)
+        {
+            yield return null;
+        }
+
+        LayoutRebuilder.MarkLayoutForRebuild((RectTransform)container.transform);
+
+        yield return null;
+
+        LayoutRebuilder.MarkLayoutForRebuild((RectTransform)container.transform);
     }
 
     private Material GetMaterialForTexture(string name, Texture2D texture)
