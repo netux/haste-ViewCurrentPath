@@ -38,7 +38,7 @@ public class EscapeMenuCurrentPath : MonoBehaviour
             }
             catch (Exception exception)
             {
-                Debug.LogError("Gave up trying to render current path. Got an exception:");
+                Debug.LogError($"{MethodBase.GetCurrentMethod().DeclaringType.Name}: Gave up trying to render current path. Got an exception:");
                 Debug.LogError(exception);
             }
         }
