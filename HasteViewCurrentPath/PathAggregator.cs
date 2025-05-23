@@ -18,7 +18,7 @@ public static class PathAggregator
 
     public static AggregateResult Aggregate(IEnumerable<LevelSelectionNode.Data> nodes, int maxNodes)
     {
-        return Aggregate(nodes.Select(node => node.Type), maxNodes);
+        return Aggregate(nodes.Select(node => node.type), maxNodes);
     }
 
     public static AggregateResult Aggregate(IEnumerable<LevelSelectionNode.NodeType> nodeTypes, int maxNodes)
