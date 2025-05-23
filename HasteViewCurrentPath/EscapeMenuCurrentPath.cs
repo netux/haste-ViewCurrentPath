@@ -18,7 +18,7 @@ public class EscapeMenuCurrentPath : MonoBehaviour
         if (Renderer.NeedsSetup())
         {
             // FAILSAFE: for some reason, objects created by the renderers might be removed after on page enter?
-            Debug.Log($"{MethodBase.GetCurrentMethod().DeclaringType.Name}: Failsafe 1 triggered!");
+            Debug.LogWarning($"{MethodBase.GetCurrentMethod().DeclaringType.Name}: Failsafe 1 triggered!");
             Renderer.Setup((RectTransform) transform);
         }
 
@@ -29,10 +29,18 @@ public class EscapeMenuCurrentPath : MonoBehaviour
         catch (Exception)
         {
             // FAILSAFE: and even after that, maybe it needs _yet another_ setup?
-            Debug.Log($"{MethodBase.GetCurrentMethod().DeclaringType.Name}: Failsafe 2 triggered!");
+            Debug.LogWarning($"{MethodBase.GetCurrentMethod().DeclaringType.Name}: Failsafe 2 triggered!");
 
-            Renderer.Setup((RectTransform)transform);
-            Render();
+            try
+            {
+                Renderer.Setup((RectTransform)transform);
+                Render();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError("Gave up trying to render current path. Got an exception:");
+                Debug.LogError(exception);
+            }
         }
     }
 
