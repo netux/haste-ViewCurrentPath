@@ -34,6 +34,18 @@ public class ViewCurrentPath
 
             CurrentPathComponent?.OnPageEnter();
         };
+
+        On.RunHandler.ClearCurrentNodePath += static (original) =>
+        {
+            var didClearIt = original();
+
+            if (didClearIt && CurrentPathComponent != null && CurrentPathComponent.gameObject != null && Renderer != null)
+            {
+                CurrentPathComponent.OnPageEnter();
+            }
+
+            return didClearIt;
+        };
     }
 
     static EscapeMenuCurrentPath CreateEscapeMenuCurrentPathComponent(RectTransform escapeMenuMainPageTransform)
